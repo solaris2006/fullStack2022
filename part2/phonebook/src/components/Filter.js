@@ -1,8 +1,12 @@
+import { InputGroup, Form } from 'react-bootstrap';
+
 const Filter = (props) => {
   return (
     <>
-      Filter shown with
-      <input type="text" onChange={props.onChange} />
+      <InputGroup className="mb-3">
+        <InputGroup.Text>Filter shown with</InputGroup.Text>
+        <Form.Control onChange={props.onChange} />
+      </InputGroup>
     </>
   );
 };

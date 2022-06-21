@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import Container from 'react-bootstrap/Container';
 
 import personService from './services/personService';
 
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
-import Persons from './components/Persons';
+import Person from './components/Person';
+
+import {} from 'react-bootstrap';
+
+import { Row, Col, ListGroup, Button, Stack, Alert } from 'react-bootstrap';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -13,6 +17,8 @@ const App = () => {
   const [newName, setName] = useState('');
   const [number, setNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [successMessage, setSuccessMessge] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((response) => {
@@ -45,7 +51,13 @@ const App = () => {
     } else if (!foundPerson) {
       personService
         .addPerson(newPerson)
-        .then((data) => setPersons(persons.concat(data)));
+        .then((data) => {
+          setPersons(persons.concat(data));
+          showMessage(successMessage, data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     } else {
       if (foundPerson) {
         if (
@@ -79,27 +91,86 @@ const App = () => {
     const personToDelete = persons.find((person) => person.id === id);
     console.log(personToDelete);
     alert(`Delete ${personToDelete.name} ?`);
-    personService.deletePerson(id).then((response) => {
-      setPersons(persons.filter((person) => person.id !== id));
-    });
+    personService
+      .deletePerson(id)
+      .then((response) => {
+        setPersons(persons.filter((person) => person.id !== id));
+      })
+      .catch((error) => {
+        setErrorMessage(
+          `Information of ${personToDelete.name} has been removed from server`
+        );
+        setTimeout(() => setErrorMessage(null), 2000);
+      });
   };
 
+  const showMessage = (message, person) => {
+    if (!message) {
+      setSuccessMessge(`Added ${person.name}`);
+    }
+
+    setTimeout(() => setSuccessMessge(null), 2000);
+  };
   const personsToShow = showFiltered(filter);
   return (
-    <div>
-      <h2>Phonebook</h2>
-      <Filter onChange={handleChange} />
-      <PersonForm
-        onSubmit={addPerson}
-        handleNameChange={handleNameChange}
-        handleNumberChange={handleNumberChange}
-        newName={newName}
-        number={number}
-      />
-      <h2>Numbers</h2>
+    <Container className="p-3">
+      <Container className="p-5 mb-4 bg-light rounded-3">
+        <Stack gap={3}>
+          <Row>
+            <Col>
+              <h2 className="header text-center">Phonebook</h2>
+              {successMessage ? (
+                <Alert key="success" variant="success">
+                  {successMessage}
+                </Alert>
+              ) : (
+                ''
+              )}
+              {errorMessage ? (
+                <Alert key="danger" variant="danger">
+                  {errorMessage}
+                </Alert>
+              ) : (
+                ''
+              )}
+              <Filter onChange={handleChange} />
+              <PersonForm
+                onSubmit={addPerson}
+                handleNameChange={handleNameChange}
+                handleNumberChange={handleNumberChange}
+                newName={newName}
+                number={number}
+              />
+            </Col>
+          </Row>
 
-      <Persons personsToShow={personsToShow} deletePerson={deletePerson} />
-    </div>
+          <Row>
+            <Col>
+              <h2 className="header text-justify">Numbers</h2>
+              <ListGroup>
+                {personsToShow.map((person) => (
+                  <ListGroup.Item key={person.name}>
+                    <Row>
+                      <Col md={8}>
+                        <Person person={person} />
+                      </Col>
+                      <Col md={{ span: 2, offset: 2 }}>
+                        <Button
+                          variant="danger"
+                          onClick={() => deletePerson(person.id)}
+                        >
+                          delete
+                        </Button>{' '}
+                      </Col>
+                    </Row>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            </Col>
+          </Row>
+        </Stack>
+      </Container>
+    </Container>
   );
 };
 

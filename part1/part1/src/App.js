@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Note from './components/Note';
 import noteService from './services/notes';
+import Notification from './components/Notification';
+import Footer from './components/Footer';
 
 const App = () => {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
   const [showAll, setShowAll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     noteService.getAll().then((initialNotes) => {
@@ -41,7 +44,13 @@ const App = () => {
         setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)));
       })
       .catch((error) => {
-        alert(`the note ${note.content} was already deleted from server`);
+        setErrorMessage(
+          `the note ${note.content} was already deleted from server`
+        );
+
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
         setNotes(notes.filter((n) => n.id !== id));
       });
   };
@@ -60,6 +69,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <ul>
         {notes.map((note) => (
           <Note
@@ -71,12 +81,15 @@ const App = () => {
       </ul>
 
       <form onSubmit={addNote}>
-        add note <input onChange={handleChange} value={newNote}></input>
-        <div>
-          {' '}
-          <button type="submit"> Add</button>
-        </div>
+        <fieldset>
+          add note <input onChange={handleChange} value={newNote}></input>
+          <div>
+            {' '}
+            <button type="submit"> Add</button>
+          </div>
+        </fieldset>
       </form>
+      <Footer />
     </div>
   );
 };
