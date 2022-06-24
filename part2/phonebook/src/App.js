@@ -89,7 +89,6 @@ const App = () => {
 
   const deletePerson = (id) => {
     const personToDelete = persons.find((person) => person.id === id);
-    console.log(personToDelete);
     alert(`Delete ${personToDelete.name} ?`);
     personService
       .deletePerson(id)
@@ -111,7 +110,8 @@ const App = () => {
 
     setTimeout(() => setSuccessMessge(null), 2000);
   };
-  const personsToShow = showFiltered(filter);
+  const personsToShow = !filter ? persons : showFiltered(filter);
+
   return (
     <Container className="p-3">
       <Container className="p-5 mb-4 bg-light rounded-3">
@@ -147,6 +147,7 @@ const App = () => {
           <Row>
             <Col>
               <h2 className="header text-justify">Numbers</h2>
+
               <ListGroup>
                 {personsToShow.map((person) => (
                   <ListGroup.Item key={person.name}>

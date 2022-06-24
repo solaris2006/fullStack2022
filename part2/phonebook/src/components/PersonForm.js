@@ -28,7 +28,7 @@ const PersonForm = (props) => {
       </Form.Group>
 
       <div>
-        <Button type="submit">add</Button>
+        <Button type="submit">Add</Button>
       </div>
     </Form>
   );
